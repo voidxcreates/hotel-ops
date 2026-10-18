@@ -63,11 +63,14 @@ export default function HotelModal({ id, version, plans, onClose, onSaved, onSta
                 <Item label="Phone">{h.owner?.phone}</Item>
                 <Item label="Email">{h.owner?.email}</Item>
               </dl>
-              <div className="sec">Receptionist</div>
-              <dl className="dl">
-                <Item label="Name">{h.receptionist?.name}</Item>
-                <Item label="Phone">{h.receptionist?.phone}</Item>
-              </dl>
+              <div className="sec">Receptionists</div>
+{(h.receptionists || []).length === 0 && <p className="k">None added.</p>}
+{(h.receptionists || []).map((r, i) => (
+  <dl className="dl" key={i}>
+    <Item label={`Receptionist ${i + 1}`}>{r.name}</Item>
+    <Item label="Phone">{r.phone}</Item>
+  </dl>
+))}
               <div className="actions end">
                 {h.plan.code === 'STANDARD' && <button className="btn alt sm" onClick={() => onRenew(h)}>Renew 1 month</button>}
                 <button className="btn alt sm" onClick={() => onStatus(h)}>{h.status === 'ACTIVE' ? 'Suspend' : 'Activate'}</button>
