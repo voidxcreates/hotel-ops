@@ -17,7 +17,8 @@ const inDays = (days) => new Date(Date.now() + days * 864e5).toISOString();
 const mk = (id, name, city, roomCount, planCode, status, joined, ends, owner, rec) => ({
   id, name, city, state: 'West Bengal', addressLine: `${10 + id}, Station Road`, pincode: '7000' + (10 + id),
   roomCount, planCode, status, joinedAt: joined, planEndsAt: ends,
-  owner: { name: owner[0], phone: owner[1], email: owner[2] }, receptionist: { name: rec[0], phone: rec[1] },
+  owner: { name: owner[0], phone: owner[1], email: owner[2] },
+  receptionists: rec[0] ? [{ name: rec[0], phone: rec[1] }] : [],
 });
 let nextId = 7;
 let HOTELS = [
@@ -41,24 +42,30 @@ const clean = (b) => ({
   name: b.name?.trim(), addressLine: b.addressLine?.trim(), city: b.city?.trim(), state: b.state?.trim() || '',
   pincode: b.pincode || '', roomCount: Number(b.roomCount),
   owner: { name: b.owner?.name?.trim(), phone: b.owner?.phone || '', email: b.owner?.email?.trim() || '' },
-  receptionist: { name: b.receptionist?.name?.trim() || '', phone: b.receptionist?.phone || '' },
+  receptionists: (b.receptionists || []).map((r) => ({ name: (r.name || '').trim(), phone: r.phone || '' })),
 });
 function problem(b) {
   if (!b.name) return 'Hotel name is required';
   if (!b.addressLine) return 'Address is required';
   if (!b.owner.name) return 'Owner name is required';
   if (!isPhone(b.owner.phone)) return 'Owner phone must be exactly 10 digits';
-  if (b.receptionist.phone && !isPhone(b.receptionist.phone)) return 'Receptionist phone must be exactly 10 digits';
+  if (b.receptionists.length > 5) return 'You can add at most 5 receptionists';
+  for (const r of b.receptionists) {
+    if (!r.name) return 'Each receptionist needs a name';
+    if (!isPhone(r.phone)) return 'Each receptionist phone must be exactly 10 digits';
+  }
   if (!(b.roomCount >= 1 && b.roomCount <= 500)) return 'Rooms must be between 1 and 500';
   return '';
 }
 const LABELS = [
   ['name', 'Hotel name'], ['addressLine', 'Address'], ['city', 'City'], ['state', 'State'], ['pincode', 'Pincode'],
   ['roomCount', 'Rooms'], ['owner.name', 'Owner name'], ['owner.phone', 'Owner phone'], ['owner.email', 'Owner email'],
-  ['receptionist.name', 'Receptionist name'], ['receptionist.phone', 'Receptionist phone'],
+['receptionists', 'Receptionists'],
 ];
-const get = (o, path) => path.split('.').reduce((a, k) => a?.[k], o);
-
+const get = (o, path) =>
+  path === 'receptionists'
+    ? o.receptionists.map((r) => `${r.name} ${r.phone}`).join(', ')
+    : path.split('.').reduce((a, k) => a?.[k], o);
 export const mock = {
   login: (email, password) => {
     if (password !== 'admin123') return fail('Wrong email or password', 401);
@@ -131,8 +138,11 @@ export const mock = {
     const names = ['Meena Paul', 'Amit Ghosh', 'Priya Sen'];
     const before = HOTELS[0];
     const nextName = names[simN++ % names.length];
-    const after = { ...before, receptionist: { ...before.receptionist, name: nextName }, addressLine: `${10 + simN}, Park Street` };
-    HOTELS = HOTELS.map((x) => (x.id === before.id ? after : x));
+    const after = {
+  ...before,
+  receptionists: [{ name: nextName, phone: before.receptionists[0]?.phone || '9830099999' }, ...before.receptionists.slice(1)],
+  addressLine: `${10 + simN}, Park Street`,
+};
     const changes = LABELS.map(([p, label]) => ({ field: label, from: get(before, p), to: get(after, p) }))
       .filter((c) => String(c.from) !== String(c.to));
     NOTES = [...NOTES, { id: nextNote++, hotelId: before.id, hotelName: before.name, changedBy: before.owner.name, changedAt: new Date().toISOString(), changes }];
