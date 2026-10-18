@@ -79,3 +79,7 @@ dialog.modal::backdrop { background: rgba(10, 20, 40, .55); }
 .bell-item:hover { background: var(--brt); }
 .bell-item ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; }
 .bell-empty { padding: 20px 16px; color: var(--mut); margin: 0; }
+.rec { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+.rec .fields { flex: 1; }
+.rec .btn { margin-top: 26px; }
+.rec-add { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
