@@ -4,7 +4,7 @@ export default function ConfirmDialog({
   title, children, confirmLabel = 'Confirm', danger = false, busy = false, error = '', onConfirm, onCancel,
 }) {
   return (
-    <Modal title={title} onClose={onCancel}>
+    <Modal title={title} onClose={onCancel} locked={busy}>
       <div>{children}</div>
       {error && <p className="error" role="alert">{error}</p>}
       <div className="actions end">

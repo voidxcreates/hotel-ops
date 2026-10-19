@@ -25,8 +25,8 @@ function Field({ label, error, hint, children }) {
 }
 
 // Used for both "Add hotel" (mode="add") and the Edit tab (mode="edit").
-export default function HotelForm({ mode, plans, initial, onSubmit, onCancel, submitLabel }) {
-  const [f, setF] = useState(() => (initial ? fromHotel(initial) : EMPTY()));
+export default function HotelForm({ mode, plans, initial, onSubmit, onCancel, submitLabel, lockRooms = false }) {
+    const [f, setF] = useState(() => (initial ? fromHotel(initial) : EMPTY()));
   const [errs, setErrs] = useState({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -94,8 +94,8 @@ export default function HotelForm({ mode, plans, initial, onSubmit, onCancel, su
       <div className="sec">Hotel</div>
       <div className="fields">
         <Field label="Hotel name" error={errs.name}><input value={f.name} onChange={set('name')} /></Field>
-        <Field label="Rooms" error={errs.roomCount}>
-          <input type="number" min="1" max="500" value={f.roomCount} onChange={set('roomCount')} />
+                <Field label="Rooms" error={errs.roomCount} hint={lockRooms ? 'Set by your account manager' : undefined}>
+          <input type="number" min="1" max="500" value={f.roomCount} onChange={set('roomCount')} disabled={lockRooms} />
         </Field>
         <Field label="Address" error={errs.addressLine}><input value={f.addressLine} onChange={set('addressLine')} /></Field>
         <Field label="City" error={errs.city}><input value={f.city} onChange={set('city')} /></Field>
