@@ -7,6 +7,7 @@ const fail = (message, status = 400) =>
   new Promise((_, j) => setTimeout(() => j(Object.assign(new Error(message), { status })), 250));
 
 const USER = { id: 1, fullName: 'Admin', email: 'admin@example.com', role: 'ADMIN' };
+const OWNER = { id: 2, fullName: 'Rahul Das', email: 'owner@example.com', role: 'OWNER', hotelId: 1 };
 const PLANS = [
   { code: 'TRIAL', name: 'Trial', pricePerRoom: 0, durationMonths: 1 },
   { code: 'STANDARD', name: 'Standard', pricePerRoom: 100, durationMonths: 1 },
@@ -69,11 +70,16 @@ const get = (o, path) =>
 export const mock = {
   login: (email, password) => {
     if (password !== 'admin123') return fail('Wrong email or password', 401);
-    sessionStorage.setItem('mockAdmin', '1');
-    return wait(USER);
+    const user = email.trim().toLowerCase().startsWith('owner') ? OWNER : USER;
+    sessionStorage.setItem('mockAdmin', user.role);
+    return wait(user);
   },
-  me: () => (sessionStorage.getItem('mockAdmin') ? wait(USER, 100) : fail('Not signed in', 401)),
-  logout: () => { sessionStorage.removeItem('mockAdmin'); return wait(null, 100); },
+  me: () => {
+    const role = sessionStorage.getItem('mockAdmin');
+    if (!role) return fail('Not signed in', 401);
+    return wait(role === 'OWNER' ? OWNER : USER, 100);
+  },
+   logout: () => { sessionStorage.removeItem('mockAdmin'); return wait(null, 100); },
   plans: () => wait(PLANS, 100),
   summary: () => {
     const live = HOTELS.filter((x) => x.status !== 'ARCHIVED');

@@ -71,3 +71,4 @@ const real = {
 };
 
 export const api = USE_MOCK ? mock : real;
+export { request };
