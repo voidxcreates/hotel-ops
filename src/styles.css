@@ -83,3 +83,11 @@ dialog.modal::backdrop { background: rgba(10, 20, 40, .55); }
 .rec .fields { flex: 1; }
 .rec .btn { margin-top: 26px; }
 .rec-add { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+textarea.reason { display: block; width: 100%; margin-top: 6px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit; resize: vertical; }
+textarea.reason:focus-visible { outline: 3px solid var(--br); outline-offset: 2px; }  
+.tablescroll { overflow-x: auto; margin-bottom: 14px; }
+.modal-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.modal-foot .k { flex: 1; min-width: 200px; }
+.custom { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 8px; }
+.custom label { margin: 0; flex: 1; min-width: 150px; }
+.custom .quick { display: flex; gap: 8px; flex-wrap: wrap; }

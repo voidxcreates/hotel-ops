@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Countdown from '../../components/Countdown';
 import { day, inr } from '../../util';
+import DetailsModal from '../DetailsModal';
 import { ownerApi } from '../ownerApi';
 import { useOwner } from '../ownerContext';
 
@@ -24,6 +25,7 @@ export default function Dashboard() {
   const [s, setS] = useState(null);
   const [state, setState] = useState('loading'); // loading, ready, empty, error
   const [error, setError] = useState('');
+  const [details, setDetails] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -69,7 +71,10 @@ export default function Dashboard() {
             <Stat label="Balance due" value={inr(s.balanceDue)} />
           </div>
           <div className="card">
-            <b>Check-ins in the last 7 days</b>
+            <div className="pagehead">
+              <b>Check-ins in the last 7 days</b>
+              <button className="btn alt sm" onClick={() => setDetails(true)}>Details</button>
+            </div>
             <div className="bars" role="img" aria-label={`Check-ins in the last 7 days: ${s.weekCheckIns.join(', ')}`}>
               {s.weekCheckIns.map((n, i) => (
                 <div className="bar" key={i}>
@@ -94,6 +99,8 @@ export default function Dashboard() {
         </p>
         <div className="k">Ends on {day(hotel.planEndsAt)}</div>
       </div>
+
+      {details && <DetailsModal onClose={() => setDetails(false)} />}
     </>
   );
 }
