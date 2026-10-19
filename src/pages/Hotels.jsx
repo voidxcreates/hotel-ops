@@ -37,6 +37,7 @@ export default function Hotels() {
   const [ask, setAsk] = useState(null); // confirmation popup: { kind, hotel, code }
   const [askBusy, setAskBusy] = useState(false);
   const [askError, setAskError] = useState('');
+  const [reason, setReason] = useState('');
   const [notes, setNotes] = useState([]); // owner edits waiting for the admin to see
   const [params, setParams] = useSearchParams();
 useEffect(() => {
@@ -93,13 +94,18 @@ useEffect(() => {
 
   async function confirm() {
     const { kind, hotel: h, code } = ask;
-    setAskBusy(true);
+if (kind === 'status' && !reason.trim()) {
+  setAskError('Please write a reason.');
+  return;
+}
+setAskBusy(true);
+
     setAskError('');
     try {
       let msg;
       if (kind === 'status') {
         const next = h.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-        await api.setStatus(h.id, next);
+        await api.setStatus(h.id, next, reason.trim());
         msg = `${h.name} is now ${next === 'ACTIVE' ? 'active' : 'suspended'}.`;
       } else if (kind === 'plan') {
         await api.setPlan(h.id, code);
@@ -118,6 +124,21 @@ useEffect(() => {
       setAskBusy(false);
     }
   }
+  const reasonField = (placeholder) => (
+  <label>
+    Reason (required)
+    <textarea
+      className="reason"
+      data-autofocus
+      rows={3}
+      maxLength={300}
+      value={reason}
+      onChange={(e) => setReason(e.target.value)}
+      placeholder={placeholder}
+    />
+    <span className="k">{reason.length}/300</span>
+  </label>
+);
 
   function renderAsk() {
     const { kind, hotel: h, code } = ask;
@@ -127,6 +148,7 @@ useEffect(() => {
       return (
         <ConfirmDialog title="Suspend this hotel?" confirmLabel="Suspend" danger busy={askBusy} error={askError} onConfirm={confirm} onCancel={() => setAsk(null)}>
           <p><b>{h.name}</b> will be suspended. Its staff will not be able to sign in until you activate it again.</p>
+            {reasonField('For example: payment not received')}
         </ConfirmDialog>
       );
     }
@@ -135,6 +157,7 @@ useEffect(() => {
         <ConfirmDialog title="Activate this hotel?" confirmLabel="Activate" busy={askBusy} error={askError} onConfirm={confirm} onCancel={() => setAsk(null)}>
           <p>Do you want to activate <b>{h.name}</b>? Its staff will be able to sign in again.</p>
           {ended && <p className="k">Its plan ended on {day(h.planEndsAt)}. Renew it too once payment is received.</p>}
+            {reasonField('For example: payment received')}
         </ConfirmDialog>
       );
     }
@@ -156,8 +179,7 @@ useEffect(() => {
     );
   }
 
-  const ask_ = (a) => { setAskError(''); setAsk(a); };
-  const pages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
+const ask_ = (a) => { setAskError(''); setReason(''); setAsk(a); };  const pages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
 
   return (
     <>

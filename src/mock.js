@@ -126,10 +126,11 @@ export const mock = {
     HOTELS = HOTELS.map((x) => (x.id === id ? { ...x, planCode, planEndsAt: planCode === 'STANDARD' && x.planCode === 'TRIAL' ? addMonths(new Date().toISOString(), 1) : x.planEndsAt } : x));
     return wait(null);
   },
-  setStatus: (id, status) => {
-    HOTELS = HOTELS.map((x) => (x.id === id ? { ...x, status } : x));
+    setStatus: (id, status, reason) => {
+    HOTELS = HOTELS.map((x) => (x.id === id ? { ...x, status, statusReason: reason || '' } : x));
     return wait(null);
   },
+  
   renew: (id) => {
     const h = HOTELS.find((x) => x.id === id);
     if (h.planCode !== 'STANDARD') return fail('Only Standard plans can be renewed');
