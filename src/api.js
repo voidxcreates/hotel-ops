@@ -68,6 +68,16 @@ const real = {
   setPlan: (id, planCode) => request(`/api/admin/hotels/${id}/plan`, { method: 'PATCH', body: { planCode } }),
   setStatus: (id, status, reason) =>
     request(`/api/admin/hotels/${id}/status`, { method: 'PATCH', body: { status, reason } }),
+    setStatus: (id, status, reason) =>
+    request(`/api/admin/hotels/${id}/status`, { method: 'PATCH', body: { status, reason } }),
+
+  // ---- NEW: owner dashboard ----
+  ownerDashboard: () => request('/api/owner/dashboard'),
+  collectBalance: (id) => request(`/api/owner/balances/${id}/collect`, { method: 'POST' }),
 };
 
 export const api = USE_MOCK ? mock : real;
+
+
+
+
