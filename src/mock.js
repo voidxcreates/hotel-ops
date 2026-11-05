@@ -1,6 +1,7 @@
 // Sample data so the UI runs before the backend exists.
 // Every function mirrors one real endpoint in api.js and returns the same shape.
 import { addMonths, isPhone } from './util';
+import { frontDeskMock } from './owner/mockFrontDesk';
 
 const wait = (v, ms = 250) => new Promise((r) => setTimeout(() => r(structuredClone(v)), ms));
 const fail = (message, status = 400) =>
@@ -66,14 +67,26 @@ const get = (o, path) =>
   path === 'receptionists'
     ? o.receptionists.map((r) => `${r.name} ${r.phone}`).join(', ')
     : path.split('.').reduce((a, k) => a?.[k], o);
+    const OWNER = { id: 2, fullName: 'Rahul Das', email: 'owner@example.com', role: 'OWNER', hotelName: 'Hotel Sunrise' };
+
+
+
 export const mock = {
-  login: (email, password) => {
+    login: (email, password) => {
     if (password !== 'admin123') return fail('Wrong email or password', 401);
-    sessionStorage.setItem('mockAdmin', '1');
-    return wait(USER);
+    const isOwner = email.startsWith('owner');
+    sessionStorage.setItem('mockAdmin', isOwner ? 'OWNER' : '1');
+    return wait(isOwner ? OWNER : USER);
   },
-  me: () => (sessionStorage.getItem('mockAdmin') ? wait(USER, 100) : fail('Not signed in', 401)),
-  logout: () => { sessionStorage.removeItem('mockAdmin'); return wait(null, 100); },
+  me: () => {
+    const s = sessionStorage.getItem('mockAdmin');
+    return s ? wait(s === 'OWNER' ? OWNER : USER, 100) : fail('Not signed in', 401);
+  },
+
+  me: () => {
+    const s = sessionStorage.getItem('mockAdmin');
+    return s ? wait(s === 'OWNER' ? OWNER : USER, 100) : fail('Not signed in', 401);
+  },  logout: () => { sessionStorage.removeItem('mockAdmin'); return wait(null, 100); },
   plans: () => wait(PLANS, 100),
   summary: () => {
     const live = HOTELS.filter((x) => x.status !== 'ARCHIVED');
@@ -131,6 +144,21 @@ export const mock = {
     HOTELS = HOTELS.map((x) => (x.id === id ? { ...x, planEndsAt: addMonths(new Date(from).toISOString(), 1) } : x));
     return wait(null);
   },
+  // ownerDashboard: () => wait({
+  //   occupancyToday: OCCUPANCY[0],
+  //   arrivingToday: OWNER_ARRIVALS.filter((a) => a.offset === 0).length,
+  //   leavingToday: OWNER_BALANCES.length,
+  //   balanceDue: OWNER_BALANCES.reduce((s, b) => s + b.amount, 0),
+  //   occupancyNext7: OCCUPANCY.map((percent, i) => ({ date: ymd(i), percent })),
+  //   balances: OWNER_BALANCES,
+  //   arrivals: OWNER_ARRIVALS.map(({ offset, ...a }) => ({ ...a, arrivalDate: ymd(offset) })),
+  // }),
+  // collectBalance: (id) => {
+  //   OWNER_BALANCES = OWNER_BALANCES.filter((b) => b.id !== id);
+  //   return wait(null);
+  // },
+    ...frontDeskMock,
+
   notifications: () => wait(NOTES, 100),
   ackNotifications: (ids) => { NOTES = NOTES.filter((n) => !ids.includes(n.id)); return wait(null, 100); },
   // Demo only: pretends the owner of Hotel Sunrise edited their details.

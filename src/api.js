@@ -68,6 +68,19 @@ const real = {
   setPlan: (id, planCode) => request(`/api/admin/hotels/${id}/plan`, { method: 'PATCH', body: { planCode } }),
   setStatus: (id, status, reason) =>
     request(`/api/admin/hotels/${id}/status`, { method: 'PATCH', body: { status, reason } }),
+    setStatus: (id, status, reason) =>
+    request(`/api/admin/hotels/${id}/status`, { method: 'PATCH', body: { status, reason } }),
+
+  // ---- NEW: owner dashboard ----
+  ownerDashboard: () => request('/api/owner/dashboard'),
+    ownerFrontDesk: (from, days = 14) => request('/api/owner/frontdesk?' + qs({ from, days })),
+  ownerAddBooking: (body) => request('/api/owner/bookings', { method: 'POST', body }),
+  ownerAddPayment: (id, body) => request(`/api/owner/bookings/${id}/payments`, { method: 'POST', body }),
+  ownerBookingAction: (id, action) => request(`/api/owner/bookings/${id}/${action}`, { method: 'POST' }),
 };
 
 export const api = USE_MOCK ? mock : real;
+
+
+
+

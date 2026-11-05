@@ -1,0 +1,77 @@
+/* Owner console styles. Everything is scoped under .ow-*, so the admin UI is not affected.
+   It reuses the colour variables from styles.css, so dark mode works automatically. */
+
+.ow-shell { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; background: var(--bg); color: var(--ink); }
+
+/* Sidebar */
+.ow-side { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 22px 12px; background: var(--card); border-right: 1px solid var(--line); }
+.ow-brand { padding: 0 16px 22px; }
+.ow-brand b { display: block; font-size: 26px; line-height: 1.1; letter-spacing: -.5px; color: var(--brx); }
+.ow-brand span { font-size: 14px; color: var(--mut); }
+.ow-nav { display: flex; flex-direction: column; gap: 6px; }
+.ow-link { display: block; padding: 14px 18px; border: 2px solid transparent; border-radius: 14px; color: var(--ink); text-decoration: none; font-size: 17px; }
+.ow-link:hover { background: var(--brt); }
+.ow-link.active { background: var(--brt); border-color: var(--br); color: var(--br); font-weight: 700; }
+.ow-link:focus-visible, .ow-out:focus-visible { outline: 3px solid var(--br); outline-offset: 2px; }
+.ow-out { margin: auto 0 0; align-self: flex-start; padding: 12px 18px; border: 0; background: none; color: var(--mut); font: inherit; cursor: pointer; border-radius: 12px; }
+.ow-out:hover { background: var(--brt); color: var(--ink); }
+
+/* Page */
+.ow-main { padding: 26px 30px 40px; min-width: 0; }
+.ow-h1 { margin: 0; font-size: 36px; line-height: 1.15; letter-spacing: -.5px; color: var(--brx); }
+.ow-sub { margin: 4px 0 20px; color: var(--mut); }
+.ow-panel { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; }
+.ow-panel h2 { margin: 0 0 12px; padding-bottom: 6px; font-size: 19px; border-bottom: 1px solid var(--line); }
+
+/* Stat cards */
+.ow-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 18px; }
+.ow-stat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; }
+.ow-stat .k { font-size: 15px; color: var(--mut); }
+.ow-stat .v { margin-top: 6px; font-size: 38px; line-height: 1.15; font-weight: 800; color: var(--br); }
+
+.ow-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+/* Bar chart: the track is 100% tall, each bar is a % of it */
+.ow-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-top: 14px; }
+.ow-col { text-align: center; font-size: 13px; color: var(--mut); }
+.ow-track { height: 150px; display: flex; align-items: flex-end; }
+.ow-bar { width: 100%; min-height: 3px; border-radius: 8px 8px 0 0; background: var(--br); }
+.ow-col b { display: block; margin-top: 6px; font-size: 14px; color: var(--ink); }
+
+/* Rows (balances + arrivals) */
+.ow-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ow-row:last-child { border-bottom: 0; }
+.ow-row .dot { color: var(--mut); }
+.ow-amt { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.ow-collect { height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.ow-collect:hover { background: var(--brt); border-color: var(--br); }
+.ow-when { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.ow-empty { margin: 8px 0 0; color: var(--mut); }
+.ow-chip { display: inline-block; padding: 2px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+.ow-chip.ok { background: #DDF5E4; color: #1B6B3A; }
+.ow-chip.warn { background: var(--warn-b); color: var(--warn-t); }
+.ow-chip.err { background: var(--err-b); color: var(--err-t); }
+@media (prefers-color-scheme: dark) { .ow-chip.ok { background: #173A27; color: #9BE0B5; } }
+
+.ow-soon { max-width: 520px; }
+
+/* Tablet and phone */
+@media (max-width: 1000px) {
+  .ow-stats { grid-template-columns: repeat(2, 1fr); }
+  .ow-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 820px) {
+  .ow-shell { grid-template-columns: 1fr; }
+  .ow-side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 12px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .ow-brand { padding: 0 8px; }
+  .ow-brand b { font-size: 20px; }
+  .ow-nav { flex-direction: row; gap: 4px; width: 100%; order: 3; overflow-x: auto; }
+  .ow-link { padding: 10px 14px; font-size: 15px; white-space: nowrap; }
+  .ow-out { margin: 0 0 0 auto; padding: 8px 12px; }
+  .ow-main { padding: 18px 14px 32px; }
+  .ow-h1 { font-size: 28px; }
+}
+@media (max-width: 520px) {
+  .ow-row.arr { flex-wrap: wrap; }
+  .ow-bars { gap: 6px; }
+}

@@ -6,11 +6,16 @@ import ConfirmDialog from './components/ConfirmDialog';
 import Hotels from './pages/Hotels';
 import Login from './pages/Login';
 import NotificationBell from './components/NotificationBell';
+import OwnerLayout from './owner/OwnerLayout';
+import OwnerDashboard from './owner/OwnerDashboard';
+import OwnerPlaceholder from './owner/OwnerPlaceholder';
+import OwnerFrontDesk from './owner/FrontDesk';
 
 function Guard({ children }) {
   const { user, ready, logout } = useAuth();
   if (!ready) return <p className="center">Loading...</p>;
   if (!user) return <Navigate to="/login" replace />;
+  if (user.role === 'OWNER') return <Navigate to="/owner" replace />;
   if (user.role !== 'ADMIN') {
     return (
       <div className="center">
@@ -57,12 +62,30 @@ function Shell({ children }) {
   );
 }
 
+function OwnerGuard({ children }) {
+  const { user, ready } = useAuth();
+  if (!ready) return <p className="center">Loading...</p>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'OWNER') return <Navigate to="/" replace />;
+  return children;
+}
+
 export default function App() {
   return (
+    
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<Guard><Shell><Hotels /></Shell></Guard>} />
       <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/owner" element={<OwnerGuard><OwnerLayout /></OwnerGuard>}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<OwnerDashboard />} />
+        {/* <Route path="front-desk" element={<OwnerPlaceholder title="Front desk" />} /> */}
+        <Route path="guests" element={<OwnerPlaceholder title="Guests" />} />
+        <Route path="reports" element={<OwnerPlaceholder title="Reports" />} />
+        <Route path="settings" element={<OwnerPlaceholder title="Settings" />} />
+        <Route path="front-desk" element={<OwnerFrontDesk />} />
+      </Route>
     </Routes>
   );
 }
