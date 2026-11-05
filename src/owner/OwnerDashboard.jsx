@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api';
-import ConfirmDialog from '../components/ConfirmDialog';
+// import ConfirmDialog from '../components/ConfirmDialog';
 import { inr } from '../util';
+import { useNavigate } from 'react-router-dom';
 
 const WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -25,9 +26,10 @@ function Stat({ label, value }) {
 export default function OwnerDashboard() {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
-  const [ask, setAsk] = useState(null); // balance row being collected
-  const [askBusy, setAskBusy] = useState(false);
-  const [askError, setAskError] = useState('');
+  // const [ask, setAsk] = useState(null); // balance row being collected
+  // const [askBusy, setAskBusy] = useState(false);
+  // const [askError, setAskError] = useState('');
+    const navigate = useNavigate();
 
   const load = useCallback(async () => {
     try {
@@ -45,19 +47,19 @@ export default function OwnerDashboard() {
     return () => clearInterval(t);
   }, [load]);
 
-  async function collect() {
-    setAskBusy(true);
-    setAskError('');
-    try {
-      await api.collectBalance(ask.id);
-      setAsk(null);
-      await load();
-    } catch (e) {
-      setAskError(e.message);
-    } finally {
-      setAskBusy(false);
-    }
-  }
+  // async function collect() {
+  //   setAskBusy(true);
+  //   setAskError('');
+  //   try {
+  //     await api.collectBalance(ask.id);
+  //     setAsk(null);
+  //     await load();
+  //   } catch (e) {
+  //     setAskError(e.message);
+  //   } finally {
+  //     setAskBusy(false);
+  //   }
+  // }
 
   if (!data) {
     return (
@@ -109,7 +111,7 @@ export default function OwnerDashboard() {
               <span><b>{b.guestName}</b> <span className="dot">&middot;</span> Room {b.room}</span>
               <span className="ow-amt">
                 {inr(b.amount)}
-                <button className="ow-collect" onClick={() => { setAskError(''); setAsk(b); }}>Collect</button>
+                <button className="ow-collect" onClick={() => navigate(`/owner/front-desk?booking=${b.id}&pay=1`)}>Collect</button>
               </span>
             </div>
           ))}
@@ -132,12 +134,12 @@ export default function OwnerDashboard() {
         })}
       </section>
 
-      {ask && (
+      {/* {ask && (
         <ConfirmDialog title="Collect balance?" confirmLabel="Mark as collected" busy={askBusy} error={askError} onConfirm={collect} onCancel={() => setAsk(null)}>
           <p>Collect <b>{inr(ask.amount)}</b> from <b>{ask.guestName}</b> (Room {ask.room})?</p>
           <p className="k">Confirm only after you have received the money.</p>
         </ConfirmDialog>
-      )}
+      )} */}
     </>
   );
 }

@@ -1,6 +1,7 @@
 // Sample data so the UI runs before the backend exists.
 // Every function mirrors one real endpoint in api.js and returns the same shape.
 import { addMonths, isPhone } from './util';
+import { frontDeskMock } from './owner/mockFrontDesk';
 
 const wait = (v, ms = 250) => new Promise((r) => setTimeout(() => r(structuredClone(v)), ms));
 const fail = (message, status = 400) =>
@@ -67,25 +68,8 @@ const get = (o, path) =>
     ? o.receptionists.map((r) => `${r.name} ${r.phone}`).join(', ')
     : path.split('.').reduce((a, k) => a?.[k], o);
     const OWNER = { id: 2, fullName: 'Rahul Das', email: 'owner@example.com', role: 'OWNER', hotelName: 'Hotel Sunrise' };
-const ymd = (offset) => {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-};
-let OWNER_BALANCES = [
-  { id: 1, guestName: 'R. Das', room: '101', amount: 1500 },
-  { id: 2, guestName: 'S. Roy', room: '108', amount: 500 },
-  { id: 3, guestName: 'Sen', room: '103', amount: 1500 },
-];
-const OWNER_ARRIVALS = [
-  { id: 1, guestName: 'Mitra', room: '102', nights: 2, offset: 0, payment: 'PART_PAID' },
-  { id: 2, guestName: 'Gupta', room: '104', nights: 2, offset: 0, payment: 'UNPAID' },
-  { id: 3, guestName: 'Bose', room: '107', nights: 3, offset: 0, payment: 'PAID' },
-  { id: 4, guestName: 'Sharma', room: '110', nights: 4, offset: 1, payment: 'PART_PAID' },
-  { id: 5, guestName: 'D. Roy', room: '106', nights: 3, offset: 2, payment: 'UNPAID' },
-  { id: 6, guestName: 'Ghosh', room: '105', nights: 2, offset: 2, payment: 'PART_PAID' },
-];
-const OCCUPANCY = [50, 50, 42, 33, 33, 25, 8];
+
+
 
 export const mock = {
     login: (email, password) => {
@@ -99,8 +83,10 @@ export const mock = {
     return s ? wait(s === 'OWNER' ? OWNER : USER, 100) : fail('Not signed in', 401);
   },
 
-  me: () => (sessionStorage.getItem('mockAdmin') ? wait(USER, 100) : fail('Not signed in', 401)),
-  logout: () => { sessionStorage.removeItem('mockAdmin'); return wait(null, 100); },
+  me: () => {
+    const s = sessionStorage.getItem('mockAdmin');
+    return s ? wait(s === 'OWNER' ? OWNER : USER, 100) : fail('Not signed in', 401);
+  },  logout: () => { sessionStorage.removeItem('mockAdmin'); return wait(null, 100); },
   plans: () => wait(PLANS, 100),
   summary: () => {
     const live = HOTELS.filter((x) => x.status !== 'ARCHIVED');
@@ -158,19 +144,20 @@ export const mock = {
     HOTELS = HOTELS.map((x) => (x.id === id ? { ...x, planEndsAt: addMonths(new Date(from).toISOString(), 1) } : x));
     return wait(null);
   },
-  ownerDashboard: () => wait({
-    occupancyToday: OCCUPANCY[0],
-    arrivingToday: OWNER_ARRIVALS.filter((a) => a.offset === 0).length,
-    leavingToday: OWNER_BALANCES.length,
-    balanceDue: OWNER_BALANCES.reduce((s, b) => s + b.amount, 0),
-    occupancyNext7: OCCUPANCY.map((percent, i) => ({ date: ymd(i), percent })),
-    balances: OWNER_BALANCES,
-    arrivals: OWNER_ARRIVALS.map(({ offset, ...a }) => ({ ...a, arrivalDate: ymd(offset) })),
-  }),
-  collectBalance: (id) => {
-    OWNER_BALANCES = OWNER_BALANCES.filter((b) => b.id !== id);
-    return wait(null);
-  },
+  // ownerDashboard: () => wait({
+  //   occupancyToday: OCCUPANCY[0],
+  //   arrivingToday: OWNER_ARRIVALS.filter((a) => a.offset === 0).length,
+  //   leavingToday: OWNER_BALANCES.length,
+  //   balanceDue: OWNER_BALANCES.reduce((s, b) => s + b.amount, 0),
+  //   occupancyNext7: OCCUPANCY.map((percent, i) => ({ date: ymd(i), percent })),
+  //   balances: OWNER_BALANCES,
+  //   arrivals: OWNER_ARRIVALS.map(({ offset, ...a }) => ({ ...a, arrivalDate: ymd(offset) })),
+  // }),
+  // collectBalance: (id) => {
+  //   OWNER_BALANCES = OWNER_BALANCES.filter((b) => b.id !== id);
+  //   return wait(null);
+  // },
+    ...frontDeskMock,
 
   notifications: () => wait(NOTES, 100),
   ackNotifications: (ids) => { NOTES = NOTES.filter((n) => !ids.includes(n.id)); return wait(null, 100); },

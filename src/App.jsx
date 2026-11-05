@@ -9,6 +9,7 @@ import NotificationBell from './components/NotificationBell';
 import OwnerLayout from './owner/OwnerLayout';
 import OwnerDashboard from './owner/OwnerDashboard';
 import OwnerPlaceholder from './owner/OwnerPlaceholder';
+import OwnerFrontDesk from './owner/FrontDesk';
 
 function Guard({ children }) {
   const { user, ready, logout } = useAuth();
@@ -79,10 +80,11 @@ export default function App() {
             <Route path="/owner" element={<OwnerGuard><OwnerLayout /></OwnerGuard>}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<OwnerDashboard />} />
-        <Route path="front-desk" element={<OwnerPlaceholder title="Front desk" />} />
+        {/* <Route path="front-desk" element={<OwnerPlaceholder title="Front desk" />} /> */}
         <Route path="guests" element={<OwnerPlaceholder title="Guests" />} />
         <Route path="reports" element={<OwnerPlaceholder title="Reports" />} />
         <Route path="settings" element={<OwnerPlaceholder title="Settings" />} />
+        <Route path="front-desk" element={<OwnerFrontDesk />} />
       </Route>
     </Routes>
   );

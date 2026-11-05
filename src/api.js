@@ -73,7 +73,10 @@ const real = {
 
   // ---- NEW: owner dashboard ----
   ownerDashboard: () => request('/api/owner/dashboard'),
-  collectBalance: (id) => request(`/api/owner/balances/${id}/collect`, { method: 'POST' }),
+    ownerFrontDesk: (from, days = 14) => request('/api/owner/frontdesk?' + qs({ from, days })),
+  ownerAddBooking: (body) => request('/api/owner/bookings', { method: 'POST', body }),
+  ownerAddPayment: (id, body) => request(`/api/owner/bookings/${id}/payments`, { method: 'POST', body }),
+  ownerBookingAction: (id, action) => request(`/api/owner/bookings/${id}/${action}`, { method: 'POST' }),
 };
 
 export const api = USE_MOCK ? mock : real;
