@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
 import { inr } from '../util';
+import CheckInDetails from './CheckInDetails';
 import { dayFull } from './dates';
+import { MODES, MODE_LABEL } from './payModes';
 
 export const PAY = { PAID: ['ok', 'Paid'], PART_PAID: ['warn', 'Part-paid'], UNPAID: ['err', 'Unpaid'] };
 const STAY = { RESERVED: ['blue', 'Not checked-in'], CHECKED_IN: ['ok', 'Checked-in'], CHECKED_OUT: ['mut', 'Checked-out'] };
@@ -17,12 +19,14 @@ const ACTS = {
 export default function BookingPanel({ booking: b, startPay, onClose, onChanged }) {
   const [act, setAct] = useState(startPay && b.balance > 0 ? 'Pay' : '');
   const [amount, setAmount] = useState(startPay && b.balance > 0 ? String(b.balance) : '');
+  const [mode, setMode] = useState('CASH');
   const [askCancel, setAskCancel] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e) => { if (e.key === 'Escape' && !document.querySelector('dialog[open]')) onClose(); };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -38,13 +42,14 @@ export default function BookingPanel({ booking: b, startPay, onClose, onChanged 
   function pick(name) {
     setAct(name);
     setAmount(name === 'Pay' && b.balance > 0 ? String(b.balance) : '');
+    setMode('CASH');
     setError('');
   }
 
   async function confirmMoney() {
     const v = Number(amount);
     if (!(v > 0)) { setError('Type an amount first.'); return; }
-    const ok = await run(() => api.ownerAddPayment(b.id, { kind: ACTS[act][0], amount: v }), `${act} saved.`);
+    const ok = await run(() => api.ownerAddPayment(b.id, { kind: ACTS[act][0], amount: v, ...(act === 'Adjustment' ? {} : { mode }) }), `${act} saved.`);
     if (ok) { setAct(''); setAmount(''); }
   }
 
@@ -64,6 +69,7 @@ export default function BookingPanel({ booking: b, startPay, onClose, onChanged 
       <div className="fd-chips">
         <span className={`ow-chip ${stayTone}`}>{stayText}</span>
         <span className={`ow-chip ${payTone}`}>{payText}</span>
+        <span className={`ow-chip ${b.idOnFile ? 'ok' : 'warn'}`}>{b.idOnFile ? 'ID on file' : 'ID missing'}</span>
       </div>
 
       <dl className="fd-kv">
@@ -83,7 +89,7 @@ export default function BookingPanel({ booking: b, startPay, onClose, onChanged 
           </tr>
           {b.payments.map((p) => (
             <tr key={p.id}>
-              <td>{p.category}</td>
+              <td>{p.category}{p.mode ? <span className="k"> · {MODE_LABEL[p.mode]}</span> : null}</td>
               <td>{p.amount < 0 ? '-' : ''}{inr(Math.abs(p.amount))}</td>
               <td><span className="ow-chip ok">Done</span></td>
             </tr>
@@ -105,6 +111,13 @@ export default function BookingPanel({ booking: b, startPay, onClose, onChanged 
           <label>{ACTS[act][1]} (&#8377;)
             <input type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
           </label>
+          {act !== 'Adjustment' && (
+            <label>{act === 'Refund' ? 'Returned by' : 'Paid by'}
+              <select value={mode} onChange={(e) => setMode(e.target.value)}>
+                {MODES.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </label>
+          )}
           <div className="actions">
             <button className="btn sm" onClick={confirmMoney} disabled={busy}>{busy ? 'Please wait...' : `Confirm ${act.toLowerCase()}`}</button>
             <button className="btn alt sm" onClick={() => { setAct(''); setError(''); }} disabled={busy}>Cancel</button>
@@ -115,6 +128,7 @@ export default function BookingPanel({ booking: b, startPay, onClose, onChanged 
       {error && <p className="error" role="alert">{error}</p>}
 
       <div className="fd-main">
+        <button className="btn alt" onClick={() => setShowDetails(true)}>Check-in details</button>
         {b.status === 'RESERVED' && (
           <>
             <button className="btn" disabled={busy} onClick={() => run(() => api.ownerBookingAction(b.id, 'check-in'), `${b.guestName} checked in.`)}>
@@ -139,6 +153,9 @@ export default function BookingPanel({ booking: b, startPay, onClose, onChanged 
           </button>
         )}
       </div>
+      {showDetails && (
+        <CheckInDetails bookingId={b.id} onClose={() => setShowDetails(false)} onSaved={(msg) => { setShowDetails(false); onChanged(msg); }} />
+      )}
     </aside>
   );
 }

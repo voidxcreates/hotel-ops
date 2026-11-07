@@ -77,6 +77,30 @@ const real = {
   ownerAddBooking: (body) => request('/api/owner/bookings', { method: 'POST', body }),
   ownerAddPayment: (id, body) => request(`/api/owner/bookings/${id}/payments`, { method: 'POST', body }),
   ownerBookingAction: (id, action) => request(`/api/owner/bookings/${id}/${action}`, { method: 'POST' }),
+    ownerGuests: (q) => request('/api/owner/guests?' + qs({ q })),
+  ownerGuest: (id) => request(`/api/owner/guests/${encodeURIComponent(id)}`),
+  ownerDeleteGuest: (id) => request(`/api/owner/guests/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  ownerCheckInDetails: (bookingId) => request(`/api/owner/bookings/${bookingId}/checkin-details`),
+  ownerSaveCheckInDetails: (bookingId, body) => request(`/api/owner/bookings/${bookingId}/checkin-details`, { method: 'PUT', body }),
+  // Photos travel as a file upload (not JSON), so these two call fetch directly.
+  async ownerUploadIdPhoto(bookingId, side, file) {
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(`/api/owner/bookings/${bookingId}/id-photo/${side}`, {
+      method: 'PUT', credentials: 'include', body: form,
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    });
+    if (!res.ok) throw await toError(res);
+  },
+  async ownerIdPhoto(bookingId, side) {
+    const res = await fetch(`/api/owner/bookings/${bookingId}/id-photo/${side}`, {
+      credentials: 'include', headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    });
+    if (!res.ok) throw await toError(res);
+    return URL.createObjectURL(await res.blob());
+  },
+
+    ownerReport: (from, to) => request('/api/owner/report?' + qs({ from, to })),
 };
 
 export const api = USE_MOCK ? mock : real;
