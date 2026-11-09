@@ -12,6 +12,7 @@ import OwnerPlaceholder from './owner/OwnerPlaceholder';
 import OwnerFrontDesk from './owner/FrontDesk';
 import OwnerGuests from './owner/Guests';
 import OwnerReports from './owner/Reports';
+import OwnerSettings from './owner/Settings';
 
 function Guard({ children }) {
   const { user, ready, logout } = useAuth();
@@ -85,10 +86,11 @@ export default function App() {
         {/* <Route path="front-desk" element={<OwnerPlaceholder title="Front desk" />} /> */}
         {/* <Route path="guests" element={<OwnerPlaceholder title="Guests" />} /> */}
         {/* <Route path="reports" element={<OwnerPlaceholder title="Reports" />} /> */}
-        <Route path="settings" element={<OwnerPlaceholder title="Settings" />} />
+        {/* <Route path="settings" element={<OwnerPlaceholder title="Settings" />} /> */}
         <Route path="front-desk" element={<OwnerFrontDesk />} />
         <Route path="guests" element={<OwnerGuests />} />
         <Route path="reports" element={<OwnerReports />} />
+        <Route path="settings" element={<OwnerSettings />} />
       </Route>
     </Routes>
   );

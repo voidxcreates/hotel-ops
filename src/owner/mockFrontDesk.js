@@ -2,6 +2,7 @@
 // Dashboard numbers are worked out from the SAME bookings, so what you do on the Front desk shows up there.
 import { addDays, diffDays, todayYmd } from './dates';
 import { MODES } from './payModes';
+import { PLAN, settingsMock } from './mockSettings';
 import { ID_TYPES, PURPOSES, cleanId } from './idTypes';
 
 const wait = (v, ms = 250) => new Promise((r) => setTimeout(() => r(structuredClone(v)), ms));
@@ -9,11 +10,17 @@ const fail = (message, status = 400) =>
   new Promise((_, j) => setTimeout(() => j(Object.assign(new Error(message), { status })), 250));
 const inr = (n) => '\u20B9' + Number(n).toLocaleString('en-IN');
 
-const ROOMS = [
-  ['101', 'Deluxe AC', 1500], ['102', 'Deluxe AC', 1500], ['103', 'Deluxe AC', 1500], ['107', 'Deluxe AC', 1500],
-  ['104', 'Standard', 900], ['105', 'Standard', 900], ['106', 'Standard', 900], ['109', 'Standard', 900], ['110', 'Standard', 900],
-  ['108', 'Family', 2000], ['111', 'Family', 2000], ['112', 'Family', 2000],
-].map(([number, type, rate]) => ({ number, type, rate }));
+// Room types and room numbers (changed from Settings). ROOMS is what the Front desk reads: { number, type, rate }.
+let nextTypeId = 4;
+const TYPES = [{ id: 1, name: 'Deluxe AC', rate: 1500 }, { id: 2, name: 'Standard', rate: 900 }, { id: 3, name: 'Family', rate: 2000 }];
+let ROOM_LIST = [['101', 1], ['102', 1], ['103', 1], ['107', 1], ['104', 2], ['105', 2], ['106', 2], ['109', 2], ['110', 2], ['108', 3], ['111', 3], ['112', 3]]
+  .map(([number, typeId]) => ({ number, typeId }));
+const ROOMS = [];
+function rebuildRooms() {
+  ROOMS.length = 0;
+  ROOM_LIST.forEach((r) => { const t = TYPES.find((x) => x.id === r.typeId); ROOMS.push({ number: r.number, type: t.name, rate: t.rate }); });
+}
+rebuildRooms();
 const rateOf = (room) => ROOMS.find((r) => r.number === room)?.rate ?? 0;
 const LABEL = { PAYMENT: 'Payment received', DEPOSIT: 'Deposit received', DISCOUNT: 'Discount', REFUND: 'Refund' };
 
@@ -28,7 +35,7 @@ function pay(b, kind, category, amount, date, time, mode, by = 'Priya') {
 const notFuture = (d) => (d > todayYmd() ? addDays(todayYmd(), -1) : d);
 const BOOKINGS = [];
 function seed(guestName, room, offset, nights, paid, status, phone = '9830012345') {
-  const b = { id: nextId++, guestName, phone, room, checkIn: addDays(todayYmd(), offset), nights, status, payments: [] };
+  const b = { id: nextId++, guestName, phone, room, checkIn: addDays(todayYmd(), offset), nights, status, rate: rateOf(room), payments: [] };
   if (paid >= 1000 && status === 'CHECKED_IN') {
     const adv = Math.floor(paid / 2 / 100) * 100; // half as advance, the rest when they arrived
     pay(b, 'DEPOSIT', 'Advance received', adv, notFuture(addDays(b.checkIn, -2)), '11:20', 'UPI');
@@ -79,7 +86,7 @@ const HISTORY = ['Verma', 'Jha', 'Banerjee', 'Shah', 'Kapoor', 'Dutta', 'Mehta',
   const rooms = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112'];
   const nights = 1 + (i % 3);
   const room = rooms[(i * 5) % 12];
-  const b = { id: 1000 + i, guestName: name, phone: `98310${String(10000 + i * 37).slice(-5)}`, room, checkIn: addDays(todayYmd(), -(2 + i * 2) - nights), nights, status: 'CHECKED_OUT', payments: [] };
+  const b = { id: 1000 + i, guestName: name, phone: `98310${String(10000 + i * 37).slice(-5)}`, room, checkIn: addDays(todayYmd(), -(2 + i * 2) - nights), nights, status: 'CHECKED_OUT', rate: rateOf(room), payments: [] };
   const total = nights * rateOf(room);
   const adv = Math.round((total * 0.4) / 100) * 100;
   pay(b, 'DEPOSIT', 'Advance received', adv, addDays(b.checkIn, -1), '12:10', MODE_KEYS[i % 4]);
@@ -89,7 +96,7 @@ const HISTORY = ['Verma', 'Jha', 'Banerjee', 'Shah', 'Kapoor', 'Dutta', 'Mehta',
 
 // The money is always worked out from the payment list, never stored twice.
 function view(b) {
-  const total = b.nights * rateOf(b.room);
+  const total = b.nights * b.rate;
   const sum = (f) => b.payments.filter(f).reduce((s, p) => s + p.amount, 0);
   const paid = sum((p) => p.kind !== 'DISCOUNT');
   const discount = sum((p) => p.kind === 'DISCOUNT');
@@ -132,7 +139,7 @@ function ownerAddBooking(body) {
   if (clash) return fail(`Room ${body.room} is already booked on those dates. Choose another room or date.`, 409);
   if (advance < 0 || advance > nights * rateOf(body.room)) return fail('Advance cannot be more than the room charge');
   if (advance > 0 && !MODE_KEYS.includes(body.mode)) return fail('Choose how the advance was paid');
-  const b = { id: nextId++, guestName, phone: body.phone || '', room: body.room, checkIn: body.checkIn, nights, status: 'RESERVED', payments: [] };
+  const b = { id: nextId++, guestName, phone: body.phone || '', room: body.room, checkIn: body.checkIn, nights, status: 'RESERVED', rate: rateOf(body.room), payments: [] };
   if (advance) pay(b, 'DEPOSIT', 'Advance received', advance, todayYmd(), nowHm(), body.mode, 'Owner');
   BOOKINGS.push(b);
   return wait(null);
@@ -193,6 +200,54 @@ function ownerDashboard() {
 }
 
 
+
+
+// ---------------- Settings: rooms and rates ----------------
+function ownerRooms() {
+  return wait({
+    roomLimit: PLAN.roomLimit,
+    types: TYPES.map((t) => ({ id: t.id, name: t.name, rate: t.rate, rooms: ROOM_LIST.filter((r) => r.typeId === t.id).map((r) => r.number) })),
+  });
+}
+
+function ownerSaveRooms(body) {
+  const types = body?.types;
+  if (!Array.isArray(types) || types.length === 0) return fail('Add at least one room type');
+  const names = new Set();
+  const seen = new Set();
+  for (const t of types) {
+    const name = String(t.name || '').trim();
+    if (!name) return fail('Room type name is required');
+    if (name.length > 30) return fail(`"${name}" is too long. Use 30 letters or fewer.`);
+    if (names.has(name.toLowerCase())) return fail(`"${name}" is used twice. Room types need different names.`);
+    names.add(name.toLowerCase());
+    const rate = Number(t.rate);
+    if (!Number.isInteger(rate) || rate < 1 || rate > 99999) return fail(`Rate for ${name} must be a whole number from 1 to 99999`);
+    for (const raw of t.rooms || []) {
+      const n = String(raw).trim().toUpperCase();
+      if (!/^[A-Z0-9]{1,8}$/.test(n)) return fail(`Room number "${raw}" is not valid. Use letters and digits only, up to 8 characters.`);
+      if (seen.has(n)) return fail(`Room ${n} is listed twice`);
+      seen.add(n);
+    }
+  }
+  if (seen.size > PLAN.roomLimit) return fail(`Your plan covers ${PLAN.roomLimit} rooms, but this list has ${seen.size}. To add more, contact your account manager.`, 409);
+  const busy = BOOKINGS.filter((b) => ['RESERVED', 'CHECKED_IN'].includes(b.status)).map((b) => b.room);
+  const blocked = ROOM_LIST.map((r) => r.number).filter((n) => !seen.has(n) && busy.includes(n));
+  if (blocked.length) return fail(`Room ${blocked.join(', ')} ${blocked.length > 1 ? 'have' : 'has'} current or upcoming bookings, so ${blocked.length > 1 ? 'they' : 'it'} cannot be removed.`, 409);
+  const oldIds = new Set(TYPES.map((t) => t.id));
+  const nextTypes = [];
+  const nextRooms = [];
+  for (const t of types) {
+    const id = t.id && oldIds.has(t.id) && !nextTypes.some((x) => x.id === t.id) ? t.id : nextTypeId++;
+    nextTypes.push({ id, name: String(t.name).trim(), rate: Number(t.rate) });
+    (t.rooms || []).forEach((raw) => nextRooms.push({ number: String(raw).trim().toUpperCase(), typeId: id }));
+  }
+  TYPES.length = 0;
+  TYPES.push(...nextTypes);
+  ROOM_LIST = nextRooms;
+  rebuildRooms();
+  return wait(null);
+}
 
 // ---------------- Reports ----------------
 function ownerReport(from, to) {
@@ -333,5 +388,6 @@ function ownerUploadIdPhoto(id, side) {
 const ownerIdPhoto = () => wait(null, 100); // sample data has no real image: the screen draws a placeholder
 
 export const frontDeskMock = {
+  ...settingsMock, ownerRooms, ownerSaveRooms,
   ownerReport,
   ownerGuests, ownerGuest, ownerDeleteGuest, ownerCheckInDetails, ownerSaveCheckInDetails, ownerUploadIdPhoto, ownerIdPhoto, ownerFrontDesk, ownerAddBooking, ownerAddPayment, ownerBookingAction, ownerDashboard };

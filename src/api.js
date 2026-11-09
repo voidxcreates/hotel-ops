@@ -99,7 +99,10 @@ const real = {
     if (!res.ok) throw await toError(res);
     return URL.createObjectURL(await res.blob());
   },
-
+    ownerHotel: () => request('/api/owner/hotel'),
+  ownerUpdateHotel: (body) => request('/api/owner/hotel', { method: 'PUT', body }),
+  ownerRooms: () => request('/api/owner/rooms'),
+  ownerSaveRooms: (body) => request('/api/owner/rooms', { method: 'PUT', body }),
     ownerReport: (from, to) => request('/api/owner/report?' + qs({ from, to })),
 };
 

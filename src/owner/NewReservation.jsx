@@ -3,12 +3,13 @@ import { api } from '../api';
 import Modal from '../components/Modal';
 import { digits, inr, isPhone } from '../util';
 import { todayYmd } from './dates';
+import { MODES } from './payModes';
 
 // "initial" can carry a room and a check-in date when the owner clicked an empty day on the timeline.
 export default function NewReservation({ rooms, initial = {}, onClose, onSaved }) {
   const [f, setF] = useState({
     guestName: '', phone: '', room: initial.room || rooms[0]?.number || '',
-    checkIn: initial.checkIn || todayYmd(), nights: 1, advance: 0,
+    checkIn: initial.checkIn || todayYmd(), nights: 1, advance: 0, mode: 'CASH',
   });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -29,7 +30,7 @@ export default function NewReservation({ rooms, initial = {}, onClose, onSaved }
     setBusy(true);
     setError('');
     try {
-      await api.ownerAddBooking({ guestName: f.guestName.trim(), phone: f.phone, room: f.room, checkIn: f.checkIn, nights, advance });
+      await api.ownerAddBooking({ guestName: f.guestName.trim(), phone: f.phone, room: f.room, checkIn: f.checkIn, nights, advance, mode: advance > 0 ? f.mode : undefined });
       onSaved(`Reservation saved for ${f.guestName.trim()}.`);
     } catch (err) {
       setError(err.message);
@@ -58,6 +59,11 @@ export default function NewReservation({ rooms, initial = {}, onClose, onSaved }
           <input type="number" min="0" value={f.advance} onChange={set('advance')} />
           <span className="k">Room charge: {inr(total)}</span>
         </label>
+        {Number(f.advance) > 0 && (
+          <label>Paid by
+            <select value={f.mode} onChange={set('mode')}>{MODES.map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+          </label>
+        )}
         {error && <p className="error" role="alert">{error}</p>}
         <div className="actions end">
           <button type="button" className="btn alt sm" onClick={onClose} disabled={busy}>Cancel</button>
