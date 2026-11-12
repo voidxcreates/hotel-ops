@@ -1,0 +1,11 @@
+/* Reports screen. Scoped under .rp-*, uses your colour variables. */
+.rp-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; }
+.rp-controls label { margin: 0; }
+.rp-controls input, .rp-controls select { width: auto; min-width: 170px; }
+.rp-quick { display: flex; gap: 8px; width: 100%; }
+.rp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 18px 0 10px; }
+.rp-modes { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+.rp-modes .ow-chip { background: var(--brt); color: var(--ink); font-size: 13px; padding: 4px 12px; }
+.rp-table { padding: 0; }
+.rp-table tfoot td { font-weight: 800; border-top: 2px solid var(--line); }
+@media (max-width: 800px) { .rp-stats { grid-template-columns: 1fr; } }

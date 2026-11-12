@@ -1,0 +1,30 @@
+/* Guests screen and the check-in details form. Scoped under .gs-*, uses your colour variables. */
+.gs-search { width: 260px; margin: 0; }
+.gs-card { padding: 0; }
+.gs-table th { white-space: nowrap; }
+.gs-row { cursor: pointer; } .gs-row:hover { background: var(--bg); }
+.gs-h { margin: 18px 0 8px; font-size: 14px; color: var(--mut); font-weight: 700; padding: 0; }
+.gs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin: 0; }
+.gs-grid dt { font-size: 12px; color: var(--mut); } .gs-grid dd { margin: 2px 0 0; font-weight: 700; }
+.gs-photos, .gs-photos2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
+.gs-photo { display: block; width: 100%; padding: 0; border: 0; background: none; text-align: left; font: inherit; color: var(--ink); }
+button.gs-photo { cursor: zoom-in; }
+.gs-photo img { display: block; width: 100%; height: 150px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); }
+.gs-photo small { display: block; margin-top: 4px; font-size: 12px; color: var(--mut); }
+.gs-sample { position: relative; height: 150px; border-radius: 12px; background: var(--brt); }
+.gs-sample i { position: absolute; left: 14px; top: 14px; width: 28%; height: 70%; border-radius: 8px; background: var(--br); opacity: .35; }
+.gs-sample span { position: absolute; left: 40%; height: 12px; border-radius: 6px; background: var(--br); opacity: .3; } .gs-sample span:nth-of-type(1) { top: 20px; right: 14px; } .gs-sample span:nth-of-type(2) { top: 46px; right: 30%; } .gs-sample span:nth-of-type(3) { top: 70px; right: 40%; }
+.gs-empty { display: grid; place-items: center; height: 150px; border: 1.5px dashed var(--line); border-radius: 12px; color: var(--mut); font-size: 13px; }
+.gs-label { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; font-weight: 700; }
+.gs-pick .actions { margin-top: 8px; } .gs-pick .btn { flex: 1; }
+.gs-zoom { display: block; width: 100%; max-height: 70vh; object-fit: contain; }
+.gs-total { margin: 16px 0 12px; }
+.rowx { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.gs-fs { border: 0; padding: 0; margin: 6px 0 0; min-width: 0; } .gs-fs legend { padding: 0; }
+.gs-radios { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.gs-radio, .gs-check { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 15px; font-weight: 500; cursor: pointer; }
+.gs-radio { padding: 0 12px; height: 46px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); }
+.gs-radio.on { border-color: var(--br); background: var(--brt); }
+.gs-radio input, .gs-check input { display: inline-block; width: 20px; height: 20px; margin: 0; accent-color: var(--br); }
+.gs-check { margin: 12px 0 6px; }
+@media (max-width: 640px) { .gs-grid, .gs-photos, .gs-photos2, .gs-radios { grid-template-columns: 1fr; } .gs-search { width: 100%; } }
