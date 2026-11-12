@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { Power } from './icons';
 import './owner.css';
+import './dashboard.css';
 
 const LINKS = [
   ['front-desk', 'Front desk'],
@@ -30,10 +32,14 @@ export default function OwnerLayout() {
             </NavLink>
           ))}
         </nav>
-        <button className="ow-out" onClick={() => setAskOut(true)}>Sign out</button>
       </aside>
 
-      <main className="ow-main"><Outlet /></main>
+      <main className="ow-main">
+        <div className="ow-topbar">
+          <button className="ow-power" onClick={() => setAskOut(true)} aria-label="Sign out" title="Sign out"><Power /></button>
+        </div>
+        <Outlet />
+      </main>
 
       {askOut && (
         <ConfirmDialog title="Sign out?" confirmLabel="Sign out" onConfirm={logout} onCancel={() => setAskOut(false)}>

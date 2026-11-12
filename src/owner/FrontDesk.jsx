@@ -34,9 +34,10 @@ export default function FrontDesk() {
   // The dashboard's "Collect" button sends the owner here: /owner/front-desk?booking=12&pay=1
   useEffect(() => {
     const id = params.get('booking');
-    if (!id) return;
-    setOpenId(Number(id));
-    setPayFirst(params.get('pay') === '1');
+    const wantsNew = params.get('new') === '1';
+    if (!id && !wantsNew) return;
+    if (id) { setOpenId(Number(id)); setPayFirst(params.get('pay') === '1'); }
+    if (wantsNew) setDraft({});
     setParams({}, { replace: true });
   }, [params, setParams]);
 
@@ -164,9 +165,9 @@ export default function FrontDesk() {
         <BookingPanel key={`${open.id}-${payFirst}`} booking={open} startPay={payFirst} onClose={() => setOpenId(null)} onChanged={changed} />
       )}
 
-      {draft && (
+      {draft && data && (
         <NewReservation
-          rooms={data?.rooms || []}
+          rooms={data.rooms}
           initial={draft}
           onClose={() => setDraft(null)}
           onSaved={(msg) => { setDraft(null); changed(msg); }}

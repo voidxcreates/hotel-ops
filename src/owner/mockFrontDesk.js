@@ -180,20 +180,21 @@ function ownerBookingAction(id, action) {
 function ownerDashboard() {
   const today = todayYmd();
   const all = BOOKINGS.map(view);
+  const live = all.filter((b) => b.status !== 'CANCELLED');
   const inHouse = all.filter((b) => b.status === 'CHECKED_IN');
   const upcoming = all.filter((b) => b.status === 'RESERVED').sort((a, b) => a.checkIn.localeCompare(b.checkIn));
-  const night = (i) => {
-    const d = addDays(today, i);
-    const n = all.filter((b) => ['RESERVED', 'CHECKED_IN'].includes(b.status) && b.checkIn <= d && d < b.checkOut).length;
-    return Math.round((n / ROOMS.length) * 100);
-  };
-  const occupancyNext7 = Array.from({ length: 7 }, (_, i) => ({ date: addDays(today, i), percent: night(i) }));
+  const act = (kind, done) => (b) => ({ kind, done: done(b), bookingId: b.id, guestName: b.guestName, room: b.room, due: b.balance });
+  const arrivalsToday = live.filter((b) => b.checkIn === today);
+  const departuresToday = live.filter((b) => b.checkOut === today && ['CHECKED_IN', 'CHECKED_OUT'].includes(b.status));
   return wait({
-    occupancyToday: occupancyNext7[0].percent,
-    arrivingToday: upcoming.filter((b) => b.checkIn === today).length,
-    leavingToday: inHouse.filter((b) => b.checkOut === today).length,
-    balanceDue: inHouse.reduce((s, b) => s + b.balance, 0),
-    occupancyNext7,
+    totalRooms: ROOMS.length,
+    occupied: inHouse.length,
+    available: Math.max(ROOMS.length - inHouse.length, 0),
+    todayBookings: arrivalsToday.length,
+    activities: [
+      ...arrivalsToday.map(act('CHECK_IN', (b) => b.status !== 'RESERVED')),
+      ...departuresToday.map(act('CHECK_OUT', (b) => b.status === 'CHECKED_OUT')),
+    ],
     balances: inHouse.filter((b) => b.balance > 0).map((b) => ({ id: b.id, guestName: b.guestName, room: b.room, amount: b.balance })),
     arrivals: upcoming.slice(0, 6).map((b) => ({ id: b.id, guestName: b.guestName, room: b.room, nights: b.nights, arrivalDate: b.checkIn, payment: b.payment })),
   });

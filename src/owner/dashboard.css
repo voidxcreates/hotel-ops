@@ -1,0 +1,46 @@
+/* Top bar with the power button, and the new Dashboard cards. Scoped under .ow-*, uses your colour variables. */
+
+/* Power button, top right of every owner screen */
+.ow-topbar { position: sticky; top: 0; z-index: 8; display: flex; justify-content: flex-end; margin: -10px 0 8px; padding: 8px 0 6px; background: var(--bg); }
+.ow-power { width: 46px; height: 46px; display: grid; place-items: center; padding: 0; border: 1.5px solid var(--line); border-radius: 50%; background: var(--card); color: var(--ink); cursor: pointer; }
+.ow-power:hover { background: var(--err-b); border-color: var(--err-t); color: var(--err-t); }
+.ow-power:focus-visible { outline: 3px solid var(--br); outline-offset: 2px; }
+
+/* Cards with an icon */
+.ow-ico { flex: none; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px; }
+.ow-ico.blu { background: var(--brt); color: var(--br); }
+.ow-ico.grn { background: #DDF5E4; color: #1B6B3A; }
+.ow-ico.org { background: var(--warn-b); color: var(--warn-t); }
+@media (prefers-color-scheme: dark) { .ow-ico.grn { background: #173A27; color: #9BE0B5; } }
+.ow-stat-ico { display: flex; align-items: center; gap: 16px; }
+.ow-stat-ico .v { margin-top: 2px; }
+
+.ow-row2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; margin-bottom: 18px; }
+.ow-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+/* Today's activities */
+.ow-ph { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.ow-ph .ow-ico { width: 38px; height: 38px; border-radius: 12px; }
+.ow-ph h2 { margin: 0; padding: 0; border: 0; font-size: 19px; }
+.ow-ph .link { margin-left: auto; }
+.ow-count { padding: 2px 10px; border-radius: 99px; background: var(--brt); color: var(--br); font-size: 13px; font-weight: 800; }
+.ow-act { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.ow-act:last-child { border-bottom: 0; }
+.ow-act:hover { background: var(--brt); }
+.ow-act:focus-visible { outline: 3px solid var(--br); outline-offset: -3px; }
+.ow-act .ow-ico { width: 42px; height: 42px; }
+.ow-act-t { flex: 1; min-width: 0; }
+.ow-act-t b { display: block; }
+.ow-act-t small { color: var(--mut); font-size: 14px; }
+
+/* Quick actions */
+.ow-quick { padding: 22px; border-radius: 18px; color: #fff; background: linear-gradient(135deg, #2f6fe0, #1b4db0); }
+.ow-quick h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; font-size: 20px; }
+.ow-quick button { display: flex; align-items: center; gap: 12px; width: 100%; height: 52px; margin-top: 12px; padding: 0 16px; border: 0; border-radius: 12px; background: #fff; color: #16254a; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+.ow-quick button:hover { background: #e7efff; }
+.ow-quick button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.ow-quick button svg { color: #2f6fe0; }
+.ow-quick small { margin-left: auto; padding: 2px 10px; border-radius: 99px; background: #e7efff; color: #1b4db0; font-size: 12px; font-weight: 800; }
+
+@media (max-width: 1000px) { .ow-row2, .ow-cols { grid-template-columns: 1fr; } }
+
