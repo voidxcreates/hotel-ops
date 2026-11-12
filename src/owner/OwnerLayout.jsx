@@ -22,7 +22,7 @@ export default function OwnerLayout() {
     <div className="ow-shell">
       <aside className="ow-side">
         <div className="ow-brand">
-          <b>Hotel Ops</b>
+          <b>HOP Desk</b>
           <span>{user?.hotelName || 'Your hotel'}</span>
         </div>
         <nav className="ow-nav" aria-label="Owner menu">
